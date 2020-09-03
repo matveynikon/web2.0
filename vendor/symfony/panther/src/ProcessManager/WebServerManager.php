@@ -25,6 +25,7 @@ final class WebServerManager
 
     private $hostname;
     private $port;
+    private $readinessPath;
 
     /**
      * @var Process
@@ -34,33 +35,48 @@ final class WebServerManager
     /**
      * @throws \RuntimeException
      */
-    public function __construct(string $documentRoot, string $hostname, int $port)
+    public function __construct(string $documentRoot, string $hostname, int $port, string $router = '', string $readinessPath = '', array $env = null)
     {
         $this->hostname = $hostname;
         $this->port = $port;
+        $this->readinessPath = $readinessPath;
 
         $finder = new PhpExecutableFinder();
         if (false === $binary = $finder->find(false)) {
             throw new \RuntimeException('Unable to find the PHP binary.');
         }
 
+        if (isset($_SERVER['PANTHER_APP_ENV'])) {
+            if (null === $env) {
+                $env = [];
+            }
+            $env['APP_ENV'] = $_SERVER['PANTHER_APP_ENV'];
+        }
+
         $this->process = new Process(
-            \array_merge(
+            array_filter(array_merge(
                 [$binary],
                 $finder->findArguments(),
                 [
                     '-dvariables_order=EGPCS',
                     '-S',
-                    \sprintf('%s:%d', $this->hostname, $this->port),
+                    sprintf('%s:%d', $this->hostname, $this->port),
                     '-t',
                     $documentRoot,
+                    $router,
                 ]
-            ),
+            )),
             $documentRoot,
-            null,
+            $env,
             null,
             null
         );
+
+        // Symfony Process 3.4 BC: In newer versions env variables always inherit,
+        // but in 4.4 inheritEnvironmentVariables is deprecated, but setOptions was removed
+        if (\is_callable([$this->process, 'inheritEnvironmentVariables']) && \is_callable([$this->process, 'setOptions'])) {
+            $this->process->inheritEnvironmentVariables(true);
+        }
     }
 
     public function start(): void
@@ -68,7 +84,13 @@ final class WebServerManager
         $this->checkPortAvailable($this->hostname, $this->port);
         $this->process->start();
 
-        $this->waitUntilReady($this->process, "http://$this->hostname:$this->port", true);
+        $url = "http://$this->hostname:$this->port";
+
+        if ($this->readinessPath) {
+            $url .= $this->readinessPath;
+        }
+
+        $this->waitUntilReady($this->process, $url, 'web server', true);
     }
 
     /**
@@ -77,5 +99,10 @@ final class WebServerManager
     public function quit(): void
     {
         $this->process->stop();
+    }
+
+    public function isStarted()
+    {
+        return $this->process->isStarted();
     }
 }

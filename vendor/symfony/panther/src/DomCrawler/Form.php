@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Symfony\Component\Panther\DomCrawler;
 
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\Support\XPathEscaper;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
@@ -23,6 +24,7 @@ use Facebook\WebDriver\WebDriverSelectInterface;
 use Symfony\Component\DomCrawler\Field\FormField;
 use Symfony\Component\DomCrawler\Form as BaseForm;
 use Symfony\Component\Panther\DomCrawler\Field\ChoiceFormField;
+use Symfony\Component\Panther\DomCrawler\Field\FileFormField;
 use Symfony\Component\Panther\DomCrawler\Field\InputFormField;
 use Symfony\Component\Panther\DomCrawler\Field\TextareaFormField;
 use Symfony\Component\Panther\ExceptionThrower;
@@ -50,6 +52,8 @@ final class Form extends BaseForm
     {
         $this->webDriver = $webDriver;
         $this->setElement($element);
+
+        $this->currentUri = $webDriver->getCurrentURL();
     }
 
     private function setElement(WebDriverElement $element)
@@ -106,11 +110,24 @@ final class Form extends BaseForm
         }
     }
 
+    /**
+     * Gets the field values.
+     *
+     * The returned array does not include file fields (@see getFiles).
+     *
+     * @return array An array of field values
+     */
     public function getValues()
     {
         $values = [];
         foreach ($this->element->findElements(WebDriverBy::xpath('.//input[@name] | .//textarea[@name] | .//select[@name] | .//button[@name]')) as $element) {
             $name = $element->getAttribute('name');
+            $type = $element->getAttribute('type');
+
+            if ('file' === $type) {
+                continue;
+            }
+
             $value = $this->getValue($element);
 
             $isArrayElement = \is_array($value) && '[]' === \substr($name, -2);
@@ -119,7 +136,7 @@ final class Form extends BaseForm
                 $name = \substr($name, 0, -2);
             }
 
-            if ('checkbox' === $element->getAttribute('type')) {
+            if ('checkbox' === $type) {
                 if (!$value) {
                     // Remove non-checked checkboxes
                     continue;
@@ -135,6 +152,27 @@ final class Form extends BaseForm
         }
 
         return $values;
+    }
+
+    public function getFiles()
+    {
+        if (!\in_array($this->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'], true)) {
+            return [];
+        }
+
+        $files = [];
+
+        foreach ($this->all() as $field) {
+            if ($field->isDisabled()) {
+                continue;
+            }
+
+            if ($field instanceof Field\FileFormField) {
+                $files[$field->getName()] = $field->getValue();
+            }
+        }
+
+        return $files;
     }
 
     public function getMethod()
@@ -214,7 +252,7 @@ final class Form extends BaseForm
             return $this->button->getAttribute('formaction');
         }
 
-        return $this->element->getAttribute('action') ?? '';
+        return (string) $this->element->getAttribute('action');
     }
 
     /**
@@ -241,7 +279,7 @@ final class Form extends BaseForm
         }
 
         if ('input' === $tagName && 'file' === $type) {
-            throw new \InvalidArgumentException('File types are not supported yet');
+            return new FileFormField($element);
         }
 
         return new InputFormField($element);
@@ -252,7 +290,7 @@ final class Form extends BaseForm
      */
     private function getAllElements(): array
     {
-        return $this->element->findElements(WebDriverBy::xpath('.//input[@name] | .//textarea[@name] | .//select[@name=] | .//button[@name]'));
+        return $this->element->findElements(WebDriverBy::xpath('.//input[@name] | .//textarea[@name] | .//select[@name] | .//button[@name]'));
     }
 
     private function getWebDriverSelect(WebDriverElement $element): ?WebDriverSelectInterface
@@ -275,7 +313,11 @@ final class Form extends BaseForm
     private function getValue(WebDriverElement $element)
     {
         if (null === $webDriverSelect = $this->getWebDriverSelect($element)) {
-            return $element->getAttribute('value') ?? '';
+            if (!$this->webDriver instanceof JavaScriptExecutor) {
+                throw new \RuntimeException('To retrieve this value, the browser must support JavaScript.');
+            }
+
+            return $this->webDriver->executeScript('return arguments[0].value', [$element]);
         }
 
         if (!$webDriverSelect->isMultiple()) {

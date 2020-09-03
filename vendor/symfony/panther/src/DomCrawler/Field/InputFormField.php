@@ -22,6 +22,17 @@ final class InputFormField extends BaseInputFormField
 {
     use FormFieldTrait;
 
+    public function setValue($value)
+    {
+        if (\in_array($this->element->getAttribute('type'), ['text'], true)) {
+            $this->setTextValue($value);
+        } elseif (\is_bool($value)) {
+            $this->element->click();
+        } else {
+            $this->element->sendKeys($value);
+        }
+    }
+
     /**
      * Initializes the form field.
      *
@@ -34,7 +45,7 @@ final class InputFormField extends BaseInputFormField
             throw new \LogicException(\sprintf('An InputFormField can only be created from an input or button tag (%s given).', $tagName));
         }
 
-        $type = \strtolower($this->element->getAttribute('type'));
+        $type = \strtolower((string) $this->element->getAttribute('type'));
         if ('checkbox' === $type) {
             throw new \LogicException('Checkboxes should be instances of ChoiceFormField.');
         }

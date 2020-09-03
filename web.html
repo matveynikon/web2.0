@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RankHack.com</title>
+
+<style>
+
+.current {
+  Float: Left;
+  color: white;
+  Font Family: Arial, Helvetica, sans-serif;
+  display: inline;
+  width: 140px;
+  height: 50px;
+  position: absolute;
+  overflow: scroll;
+  font-size: 40px;
+  z-index: 2;
+  top: 1.1%;
+  left: 0.6%;
+  text-indent: 15px;
+  white-space: nowrap;
+}
+
+.next {
+  Float: Left;
+  color: white;
+  Font Family: Arial, Helvetica, sans-serif;
+  display: inline;
+  width: 140px;
+  height: 50px;
+  position: absolute;
+  overflow: scroll;
+  font-size: 40px;
+  z-index: 2;
+  top: 1.1%;
+  left: 140px;
+  z-index: 2;
+  text-indent: 15px;
+  white-space: nowrap;
+
+}
+
+
+.next:hover {
+  color: white;
+  Float: Left;
+  Font Family: Arial, Helvetica, sans-serif;
+  display: inline;
+  width: 140px;
+  height: 50px;
+  text-indent: 5px;
+  position: center;
+  overflow: scroll;
+  font-size: 40px;
+  top: 1.1%;
+  left: 140px;
+  animation-name: example2;
+  animation-duration: 0.6s;
+  animation-delay: 0.3s;
+  animation-fill-mode: both;
+  z-index: 2;
+  text-indent: 15px;
+  white-space: nowrap;
+}
+
+
+.current:hover {
+  color: white;
+  Float: Left;
+  Font Family: Arial, Helvetica, sans-serif;
+  display: inline;
+  width: 140px;
+  height: 50px;
+  text-indent: 5px;
+  position: center;
+  overflow: scroll;
+  font-size: 40px;
+  top: 1.1%;
+  left: 0.6%;
+  animation-name: example2;
+  animation-duration: 0.6s;
+  animation-delay: 0.3s;
+  animation-fill-mode: both;
+  z-index: 2;
+  text-indent: 15px;
+  white-space: nowrap;
+}
+
+@keyframes example2{
+  from {color: khaki;}
+  to {color: turquoise;}
+}
+
+* {
+   font-family:Arial, Helvetica, sans-serif;
+   font-size: 35px;
+   overflow: auto;
+
+}
+
+.img {
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
+  background-image: url('an.jpg');
+  height: 700px;
+  background-position: center;
+}
+
+.img2 {
+  filter: blur(4px);
+  -webkit-filter: blur(4px);
+  background-image: url('j.jpg');
+  height: 1000px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.img2:hover {
+  animation-name: example3;
+  animation-duration: 1s;
+  animation-delay: 0.1s;
+  animation-fill-mode: both;
+  background-image: url('j.jpg');
+  height: 1000px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.img3 {
+  background-image: url('pg.jpg');
+  height: 1200px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+
+h1 {
+   font-family: myFirstFont;
+   font-size: 50px;
+   color: lightseagreen;
+   background-color: rgba(205,125,70, 0.6); /* Black w/opacity/see-through */
+   font-weight: bold;
+   border: 3px solid #f1f1f1;
+   position: absolute;
+   top: 40%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   z-index: 2;
+   width: 80%;
+   padding: 20px;
+   border-radius: 15px;
+   text-align: center;
+   animation: fadein 2s;
+   animation-fill-mode: both;
+}
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+}
+
+@keyframes example {
+  from {background-color: lagoon;}
+  to {background-color: gold;}
+}
+@keyframes example6 {
+  from {background-color: lagoon;}
+  to {background-color: gold;}
+}
+
+@keyframes example3 {
+  from {  filter: blur(2px);
+  -webkit-filter: blur(2px);}
+  to {  filter: blur(0px);
+  -webkit-filter: blur(0px);;}
+}
+p {
+   font-family: myFirstFont;
+   font-size: 50px;
+   color: lightseagreen;
+   background-color: rgba(205,125,70, 0.6); /* Black w/opacity/see-through */
+   font-weight: bold;
+   border: 3px solid #f1f1f1;
+   position: absolute;
+   top: 100%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   z-index: 2;
+   width: 80%;
+   padding: 20px;
+   border-radius: 15px;
+   text-align: center;
+}
+
+
+h2 {
+   font-family: myFirstFont;
+   font-size: 50px;
+   color: gold;
+   background-color: rgba(0,255,0, 0.4); /* Black w/opacity/see-through */
+   font-weight: bold;
+   border: 3px solid #f1f1f1;
+   position: absolute;
+   top: 125%;
+   left: 95%;
+   transform: translate(-50%, -50%);
+   z-index: 2;
+   width: 30%;
+   padding: 20px;
+   border-radius: 10px;
+   text-align: center;
+   animation-name: example5;
+   animation-duration: 1.5s;
+   animation-delay: 0.1s;
+   animation-fill-mode: both;
+}
+
+h5 {
+  Float: top;
+  Font Family: Arial, Helvetica, sans-serif;
+  width: 300px;
+  height: 50px;
+  text-indent: 45px;
+  background: turquoise;
+  position: absolute;
+  border-radius: 20px;
+  display: inline;
+  top: 350%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 80%;
+  padding: 20px;
+  text-align: center;
+
+
+}
+
+h5:hover {
+  Float: top;
+  Font Family: Arial, Helvetica, sans-serif;
+  width: 300px;
+  height: 50px;
+  text-indent: 45px;
+  background: turquoise;
+  position: absolute;
+  border-radius: 20px;
+  display: inline;
+  top: 350%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 80%;
+  padding: 20px;
+  text-align: center;
+  animation-name: example4;
+  animation-duration: 1.5s;
+  animation-delay: 0.1s;
+  animation-fill-mode: both;
+
+}
+
+@keyframes example4 {
+  from {background: turquoise;}
+  to {background: slateblue;}
+}
+
+@keyframes example5{
+  from {left: 95%;}
+  to {left: 80%;}
+}
+</style>
+</head>
+<body>
+<div class="img">
+</div>
+<ul>
+
+    <li><b><a href="index.html" class="current">Home</a></b></li>
+    <li><b><a href="services.html" class="next">Tasks</a></b></li>
+
+</ul>
+<div class="img3">
+</div>
+<h1>Crack the social media algorithm for explosive social growth</h1>
+<h5><a href="services.html"><font color="black">Get started!</font></a></h5>
+<h2>How it works</h2>
+<p>hey</p>
+<div class="img2">
+</div>
+</body>
+</html>

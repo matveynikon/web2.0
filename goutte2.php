@@ -1,20 +1,30 @@
 <?php
-  require_once('vendor/autoload.php');
-  use Facebook\WebDriver\Remote\RemoteWebDriver;
-  use Facebook\WebDriver\WebDriverBy;
-  $caps = array(
-"browserName" => "iPhone",
-"device" => "iPhone 11",
-"realMobile" => "true",
-"os_version" => "13.0",
-);
-$capabilities = array(WebDriverCapabilityType::BROWSER_NAME => 'chrome');
-$web_driver->get("https://www.google.com", $capabilities);
-$element = $web_driver->findElement(WebDriverBy::name("q"));
-if($element) {
-    $element->sendKeys("Browserstack");
-    $element->submit();
+// selenium-tests/tests/TitlePageTest.php
+
+namespace My; // Note the "My" namespace maps to the "tests" folder, as defined in the autoload part of `composer.json`.
+
+use Facebook\WebDriver\WebDriverBy;
+use Lmc\Steward\Test\AbstractTestCase;
+
+class TitlePageTest extends AbstractTestCase
+{
+    public function testShouldContainSearchInput()
+    {
+        // Load the URL (will wait until page is loaded)
+        $this->wd->get('http://www.w3.org/'); // $this->wd holds instance of \RemoteWebDriver
+
+        // Do some assertion
+        $this->assertContains('W3C', $this->wd->getTitle());
+
+        // You can use $this->log(), $this->warn() or $this->debug() with sprintf-like syntax
+        $this->log('Current page "%s" has title "%s"', $this->wd->getCurrentURL(), $this->wd->getTitle());
+
+        // Make sure search input is present
+        $searchInput = $this->wd->findElement(WebDriverBy::cssSelector('#search-form input'));
+        // Or you can use syntax sugar provided by Steward (this is equivalent of previous line)
+        $searchInput = $this->findByCss('#search-form input');
+
+        // Assert title of the search input
+        $this->assertEquals('Search', $searchInput->getAttribute('title'));
+    }
 }
-print $web_driver->getTitle();
-$web_driver->quit();
-?> 

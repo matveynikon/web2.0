@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Symfony\Component\Panther\Cookie;
 
 use Facebook\WebDriver\Cookie as WebDriverCookie;
+use Facebook\WebDriver\Exception\NoSuchCookieException;
 use Facebook\WebDriver\WebDriver;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\BrowserKit\CookieJar as BaseCookieJar;
@@ -134,12 +135,18 @@ final class CookieJar extends BaseCookieJar
 
     private function getWebDriverCookie(string $name, string $path = '/', ?string $domain = null)
     {
-        if (null === $cookie = $this->webDriver->manage()->getCookieNamed($name)) {
+        try {
+            $cookie = $this->webDriver->manage()->getCookieNamed($name);
+        } catch (NoSuchCookieException $e) {
+            return null;
+        }
+
+        if (null === $cookie) {
             return null;
         }
 
         $cookiePath = $cookie->getPath() ?? '/';
-        if (0 !== \strpos($path, $cookiePath)) {
+        if (0 !== strpos($path, $cookiePath)) {
             return null;
         }
 
@@ -148,8 +155,8 @@ final class CookieJar extends BaseCookieJar
             return $cookie;
         }
 
-        $cookieDomain = '.'.\ltrim($cookieDomain, '.');
-        if ($cookieDomain !== \substr('.'.$domain, -\strlen($cookieDomain))) {
+        $cookieDomain = '.'.ltrim($cookieDomain, '.');
+        if ($cookieDomain !== substr('.'.$domain, -\strlen($cookieDomain))) {
             return null;
         }
 

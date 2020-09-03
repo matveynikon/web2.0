@@ -13,11 +13,15 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Panther;
 
+use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\TimeoutException;
+use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverCapabilities;
 use Facebook\WebDriver\WebDriverExpectedCondition;
-use Symfony\Component\BrowserKit\Client as BaseClient;
+use Facebook\WebDriver\WebDriverHasInputDevices;
+use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Form;
@@ -28,12 +32,17 @@ use Symfony\Component\Panther\DomCrawler\Form as PantherForm;
 use Symfony\Component\Panther\DomCrawler\Link as PantherLink;
 use Symfony\Component\Panther\ProcessManager\BrowserManagerInterface;
 use Symfony\Component\Panther\ProcessManager\ChromeManager;
+use Symfony\Component\Panther\ProcessManager\FirefoxManager;
 use Symfony\Component\Panther\ProcessManager\SeleniumManager;
+use Symfony\Component\Panther\WebDriver\WebDriverMouse;
 
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
+ * @author Dany Maillard <danymaillard93b@gmail.com>
+ *
+ * @method Crawler getCrawler()
  */
-final class Client extends BaseClient implements WebDriver
+final class Client extends AbstractBrowser implements WebDriver, JavaScriptExecutor, WebDriverHasInputDevices
 {
     use ExceptionThrower;
 
@@ -43,6 +52,7 @@ final class Client extends BaseClient implements WebDriver
     private $webDriver;
     private $browserManager;
     private $baseUri;
+    private $isFirefox = false;
 
     /**
      * @param string[]|null $arguments
@@ -52,15 +62,25 @@ final class Client extends BaseClient implements WebDriver
         return new self(new ChromeManager($chromeDriverBinary, $arguments, $options), $baseUri);
     }
 
-    public static function createSeleniumClient(?string $host = null, ?WebDriverCapabilities $capabilities = null, ?string $baseUri = null): self
+    public static function createFirefoxClient(?string $geckodriverBinary = null, ?array $arguments = null, array $options = [], ?string $baseUri = null): self
     {
-        return new self(new SeleniumManager($host, $capabilities), $baseUri);
+        return new self(new FirefoxManager($geckodriverBinary, $arguments, $options), $baseUri);
+    }
+
+    public static function createSeleniumClient(?string $host = null, ?WebDriverCapabilities $capabilities = null, ?string $baseUri = null, array $options = []): self
+    {
+        return new self(new SeleniumManager($host, $capabilities, $options), $baseUri);
     }
 
     public function __construct(BrowserManagerInterface $browserManager, ?string $baseUri = null)
     {
         $this->browserManager = $browserManager;
         $this->baseUri = $baseUri;
+    }
+
+    public function getBrowserManager(): BrowserManagerInterface
+    {
+        return $this->browserManager;
     }
 
     public function __destruct()
@@ -70,9 +90,40 @@ final class Client extends BaseClient implements WebDriver
 
     public function start()
     {
-        if (null === $this->webDriver) {
-            $this->webDriver = $this->browserManager->start();
+        if (null !== $this->webDriver) {
+            return;
         }
+
+        $this->webDriver = $this->browserManager->start();
+        if ($this->browserManager instanceof FirefoxManager) {
+            $this->isFirefox = true;
+
+            return;
+        }
+
+        if ($this->browserManager instanceof ChromeManager) {
+            $this->isFirefox = false;
+
+            return;
+        }
+
+        if (method_exists($this->webDriver, 'getCapabilities')) {
+            $this->isFirefox = 'firefox' === $this->webDriver->getCapabilities()->getBrowserName();
+
+            return;
+        }
+
+        $this->isFirefox = false;
+    }
+
+    public function getRequest()
+    {
+        throw new \LogicException('HttpFoundation Request object is not available when using WebDriver.');
+    }
+
+    public function getResponse()
+    {
+        throw new \LogicException('HttpFoundation Response object is not available when using WebDriver.');
     }
 
     public function followRedirects($followRedirect = true): void
@@ -132,16 +183,48 @@ final class Client extends BaseClient implements WebDriver
         return parent::click($link);
     }
 
-    public function submit(Form $form, array $values = [])
+    public function submit(Form $form, array $values = [], array $serverParameters = [])
     {
         if ($form instanceof PantherForm) {
+            foreach ($values as $field => $value) {
+                $form->get($field)->setValue($value);
+            }
+
             $button = $form->getButton();
-            null === $button ? $form->getElement()->submit() : $button->click();
+
+            if ($this->isFirefox) {
+                // For Firefox, we have to wait for the page to reload
+                // https://github.com/SeleniumHQ/selenium/issues/4570#issuecomment-327473270
+                $selector = WebDriverBy::cssSelector('html');
+                $previousId = $this->webDriver->findElement($selector)->getID();
+
+                null === $button ? $form->getElement()->submit() : $button->click();
+
+                try {
+                    $this->webDriver->wait(5)->until(static function (WebDriver $driver) use ($previousId, $selector) {
+                        try {
+                            return $previousId !== $driver->findElement($selector)->getID();
+                        } catch (NoSuchElementException $e) {
+                            // The html element isn't already available
+                            return false;
+                        }
+                    });
+                } catch (TimeoutException $e) {
+                    // Probably a form using AJAX, do nothing
+                }
+            } else {
+                null === $button ? $form->getElement()->submit() : $button->click();
+            }
 
             return $this->crawler = $this->createCrawler();
         }
 
-        return parent::submit($form, $values);
+        return parent::submit($form, $values, $serverParameters);
+    }
+
+    public function refreshCrawler(): Crawler
+    {
+        return $this->crawler = $this->createCrawler();
     }
 
     public function request(string $method, string $uri, array $parameters = [], array $files = [], array $server = [], string $content = null, bool $changeHistory = true): Crawler
@@ -177,7 +260,7 @@ final class Client extends BaseClient implements WebDriver
 
     protected function doRequest($request)
     {
-        throw new \Exception('Not useful in WebDriver mode.');
+        throw new \LogicException('Not useful in WebDriver mode.');
     }
 
     public function back()
@@ -215,7 +298,7 @@ final class Client extends BaseClient implements WebDriver
             $this->webDriver->manage()->deleteAllCookies();
         }
 
-        $this->quit();
+        $this->quit(false);
         $this->start();
     }
 
@@ -226,11 +309,27 @@ final class Client extends BaseClient implements WebDriver
         return new CookieJar($this->webDriver);
     }
 
-    public function waitFor(string $cssSelector, int $timeoutInSecond = 30, int $intervalInMillisecond = 250): object
+    /**
+     * @param string $locator The path to an element to be waited for. Can be a CSS selector or Xpath expression.
+     *
+     * @throws NoSuchElementException
+     * @throws TimeoutException
+     *
+     * @return Crawler
+     */
+    public function waitFor(string $locator, int $timeoutInSecond = 30, int $intervalInMillisecond = 250)
     {
-        return $this->wait($timeoutInSecond, $intervalInMillisecond)->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($cssSelector))
+        $locator = trim($locator);
+
+        $by = '' === $locator || '/' !== $locator[0]
+            ? WebDriverBy::cssSelector($locator)
+            : WebDriverBy::xpath($locator);
+
+        $this->wait($timeoutInSecond, $intervalInMillisecond)->until(
+            WebDriverExpectedCondition::presenceOfElementLocated($by)
         );
+
+        return $this->crawler = $this->createCrawler();
     }
 
     public function getWebDriver(): WebDriver
@@ -249,9 +348,10 @@ final class Client extends BaseClient implements WebDriver
             $uri = $this->baseUri.$uri;
         }
 
-        $this->request = $this->internalRequest = new Request($uri, 'GET');
+        $this->internalRequest = new Request($uri, 'GET');
         $this->webDriver->get($uri);
-        $this->response = $this->internalResponse = new Response($this->webDriver->getPageSource());
+        $this->internalResponse = new Response($this->webDriver->getPageSource());
+
         $this->crawler = $this->createCrawler();
 
         return $this;
@@ -299,13 +399,16 @@ final class Client extends BaseClient implements WebDriver
         return $this->webDriver->getWindowHandles();
     }
 
-    public function quit()
+    public function quit(bool $quitBrowserManager = true)
     {
         if (null !== $this->webDriver) {
             $this->webDriver->quit();
             $this->webDriver = null;
         }
-        $this->browserManager->quit();
+
+        if ($quitBrowserManager) {
+            $this->browserManager->quit();
+        }
     }
 
     public function takeScreenshot($saveAs = null)
@@ -362,5 +465,41 @@ final class Client extends BaseClient implements WebDriver
         $this->start();
 
         return $this->webDriver->findElements($locator);
+    }
+
+    public function executeScript($script, array $arguments = [])
+    {
+        if (!$this->webDriver instanceof JavaScriptExecutor) {
+            throw new \RuntimeException(sprintf('"%s" does not implement "%s".', \get_class($this->webDriver), JavaScriptExecutor::class));
+        }
+
+        return $this->webDriver->executeScript($script, $arguments);
+    }
+
+    public function executeAsyncScript($script, array $arguments = [])
+    {
+        if (!$this->webDriver instanceof JavaScriptExecutor) {
+            throw new \RuntimeException(sprintf('"%s" does not implement "%s".', \get_class($this->webDriver), JavaScriptExecutor::class));
+        }
+
+        return $this->webDriver->executeAsyncScript($script, $arguments);
+    }
+
+    public function getKeyboard()
+    {
+        if (!$this->webDriver instanceof WebDriverHasInputDevices) {
+            throw new \RuntimeException(sprintf('"%s" does not implement "%s".', \get_class($this->webDriver), WebDriverHasInputDevices::class));
+        }
+
+        return $this->webDriver->getKeyboard();
+    }
+
+    public function getMouse(): WebDriverMouse
+    {
+        if (!$this->webDriver instanceof WebDriverHasInputDevices) {
+            throw new \RuntimeException(sprintf('"%s" does not implement "%s".', \get_class($this->webDriver), WebDriverHasInputDevices::class));
+        }
+
+        return new WebDriverMouse($this->webDriver->getMouse(), $this);
     }
 }
