@@ -202,7 +202,7 @@ h5:hover {
 </ul>
 <script>
 window.addEventListener('load', function () {
-  alert("It's loaded!");
+  alert("It's loaded dude!");
 });
 </script>
 
