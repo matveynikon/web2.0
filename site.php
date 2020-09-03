@@ -212,7 +212,7 @@ if(array_key_exists('button1', $_POST)) {
 } 
 function button1(){
   ignore_user_abort(true);
-  exec("node jtest.js &");
+  exec("php goutte.php &");
 }
 button1();
 ?>
