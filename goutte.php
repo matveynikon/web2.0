@@ -14,7 +14,7 @@ sleep(1);
 $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping');
 sleep(15);
 
-$client->takeScreenshot('shot2.png');   
+//$client->takeScreenshot('shot2.png');   
 $link = $crawler->selectLink('php web scraping tutorial(simple)')->link();
 $crawler = $client->click($link);
 //var_dump($client->getResponse()->getContent());
