@@ -12,7 +12,7 @@ $client = \Symfony\Component\Panther\Client::createChromeClient(null, [
   //$client->setClient(new \GuzzleHttp\Client(['proxy' => '199.217.116.5:5836']));
 sleep(1);
 $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping');
-sleep(15);
+sleep(3);
 
 $client->takeScreenshot('shot2.png');   
 $link = $crawler->selectLink('PHP Web Scraping - Simple HTML DOM Parser')->link();
