@@ -220,6 +220,7 @@ function button1(){
   sleep(3);
   $link = $crawler->selectLink('PHP Web Scraping - Simple HTML DOM Parser')->link();
   $crawler = $client->click($link);
+  echo($link);
 }
 button1();
 ?>
