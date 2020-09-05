@@ -12,10 +12,6 @@ function button1(){
   $client = \Symfony\Component\Panther\Client::createChromeClient(null, [
     '--headfull'
   ]);
-  sleep(1);
-  $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
-  sleep(3);
-  $client->clickLink('php web scraping tutorial(simple)');
 }
 button1();
 ?>
