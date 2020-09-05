@@ -13,9 +13,9 @@ function button1(){
     '--headfull'
   ]);
   sleep(1);
-  $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping');
+  $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
   sleep(3);
-  $client->clickLink('PHP Web Scraping - Simple HTML DOM Parser');
+  $client->clickLink('php web scraping tutorial(simple)');
 }
 button1();
 ?>
