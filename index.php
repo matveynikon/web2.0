@@ -7,9 +7,10 @@
 <body>
 <?php
   require 'vendor/autoload.php';
-  use Goutte\Client;
+  //use Goutte\Client;
 
-  $client = new Client();
+  //$client = new Client();
+  $client = \Symfony\Component\Panther\Client::createChromeClient();  
   sleep(1);
   $c = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
   sleep(1);
