@@ -21,7 +21,6 @@ function button1(){
   $link = $crawler->selectLink('PHP Web Scraping - Simple HTML DOM Parser')->link();
   $crawler = $client->click($link);
 }
-button1();
 ?>
 <form method="post"> 
    <input type="submit" name="button1"
