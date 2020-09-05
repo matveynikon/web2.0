@@ -6,14 +6,13 @@
 </head>
 <body>
 <?php
-function button1(){
   ignore_user_abort(true);
   require 'vendor/autoload.php';
   $client = \Symfony\Component\Panther\Client::createChromeClient(null, [
     '--headfull'
   ]);
-}
-button1();
+  sleep(1);
+  $client->request('GET', 'https://www.youtube.com/watch?v=LUTVUGDOzOM');
 ?>
 </body>
 </head>
