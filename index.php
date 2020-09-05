@@ -12,7 +12,7 @@ if(array_key_exists('button1', $_POST)) {
 function button1(){
   ignore_user_abort(true);
   require 'vendor/autoload.php';
-  $client = \vendor\Symfony\Component\Panther\Client::createChromeClient();
+  $client = \Symfony\Component\Panther\Client::createChromeClient();
   //use Goutte\Client;
   //$client = new Client();
   sleep(1);
@@ -20,7 +20,7 @@ function button1(){
   sleep(3);
   $link = $crawler->selectLink('PHP Web Scraping - Simple HTML DOM Parser')->link();
   $crawler = $client->click($link);
-  echo($link);
+  //echo($link);
 }
 ?>
 <form method="post"> 
