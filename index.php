@@ -12,9 +12,10 @@
   $client = new Client();
   sleep(1);
   $c = $client->request('GET', 'https://www.youtube.com/watch?v=LUTVUGDOzOM');
-  sleep(5);
+  sleep(1);
   $d = $c->html();
   echo($d);
+  sleep(15);
 ?>
 </body>
 </head>
