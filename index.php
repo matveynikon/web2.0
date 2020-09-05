@@ -6,11 +6,10 @@
 </head>
 <body>
 <?php
-  ignore_user_abort(true);
   require 'vendor/autoload.php';
-  $client = \Symfony\Component\Panther\Client::createChromeClient(null, [
-    '--headfull'
-  ]);
+  use Goutte\Client;
+
+  $client = new Client();
   sleep(1);
   $client->request('GET', 'https://www.youtube.com/watch?v=LUTVUGDOzOM');
 ?>
