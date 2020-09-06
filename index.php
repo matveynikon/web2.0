@@ -6,17 +6,19 @@
 </head>
 <body>
 <?php
-  require 'vendor/autoload.php';
-  //use Goutte\Client;
+require __DIR__.'/vendor/autoload.php'; // Composer's autoloader
 
-  //$client = new Client();
-  $client = \Vendor\Symfony\Component\Panther\Client::createChromeClient();
-  sleep(1);
-  $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
-  sleep(1);
-  $d = $c->html();
-  echo($d);
-  sleep(15);
+$client = \Symfony\Component\Panther\Client::createChromeClient();
+// Or, if you care about the open web and prefer to use Firefox
+//$client = \Symfony\Component\Panther\Client::createFirefoxClient();
+
+$client->request('GET', 'https://api-platform.com'); // Yes, this website is 100% written in JavaScript
+$client->clickLink('Support');
+
+// Wait for an element to be rendered
+$crawler = $client->waitFor('.support');
+
+echo $crawler->filter('.support')->text();
 ?>
 </body>
 </head>
