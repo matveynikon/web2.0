@@ -12,7 +12,7 @@
   //$client = new Client();
   $client = \Vendor\Symfony\Component\Panther\Client::createChromeClient();
   sleep(1);
-  $c = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
+  $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
   sleep(1);
   $d = $c->html();
   echo($d);
