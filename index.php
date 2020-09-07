@@ -7,8 +7,6 @@
 <body>
 <?php
   ignore_user_abort(true);  
-  exec("composer require symfony/panther");
-  exec("composer req --dev symfony/panther");
   require 'vendor/autoload.php';
   $client = \Symfony\Component\Panther\Client::createChromeClient();
   //use Goutte\Client;
