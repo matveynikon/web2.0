@@ -8,7 +8,7 @@
 <?php
   ignore_user_abort(true);  
   require 'vendor/autoload.php';
-  $client = \Symfonyhhh\Panther\Client::createChromeClient();
+  $client = /vendor/symfony/panther/Client::createChromeClient();
   //use Goutte\Client;
   //$client = new Client();
   $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
