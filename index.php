@@ -13,8 +13,8 @@
   $client = new Client();
   $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
   sleep(3);
-  $d = $c->html();
-  echo($d);
+  //$d = $c->html();
+  echo('hey');
   //$client->clickLink('php web scraping tutorial(simple)');
   //$crawler = $client->click($link);
   //sleep(15);
