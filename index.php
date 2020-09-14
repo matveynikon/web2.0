@@ -11,7 +11,7 @@
   $client = \Symfony\Component\Panther\Client::createChromeClient();
   //use Goutte\Client;
   //$client = new Client();
-  $crawler = $client->request('GET', 'https://matveynikon.wixsite.com/dailyhero/post/4-ocean');
+  $client->request('GET', 'https://matveynikon.wixsite.com/dailyhero/post/4-ocean');
   sleep(15);
   //$d = $c->html();
   echo('hey');
