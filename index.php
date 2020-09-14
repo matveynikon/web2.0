@@ -11,8 +11,8 @@
   $client = \Symfony\Component\Panther\Client::createChromeClient();
   //use Goutte\Client;
   //$client = new Client();
-  $crawler = $client->request('GET', 'https://www.youtube.com/results?search_query=php+web+scraping&sp=CAASBAgEEAE%253D');
-  sleep(3);
+  $crawler = $client->request('GET', 'https://matveynikon.wixsite.com/dailyhero/post/4-ocean');
+  sleep(15);
   //$d = $c->html();
   echo('hey');
   //$client->clickLink('php web scraping tutorial(simple)');
