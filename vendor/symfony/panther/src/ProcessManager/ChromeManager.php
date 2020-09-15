@@ -95,7 +95,7 @@ final class ChromeManager implements BrowserManagerInterface
         return [
             'scheme' => 'http',
             'host' => '127.0.0.1',
-            'port' => 9516,
+            'port' => 9529,
             'path' => '/status',
         ];
     }
