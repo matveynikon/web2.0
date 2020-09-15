@@ -7,7 +7,8 @@
 <body>
 <?php
   ignore_user_abort(true);  
-  exec("kill $(lsof -t -i:9515)");  
+  exec("kill $(lsof -t -i:9529)");  
+  sleep(2);
   require 'vendor/autoload.php';
   $client = \Symfony\Component\Panther\Client::createChromeClient();
   //use Goutte\Client;
