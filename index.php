@@ -8,6 +8,7 @@
 <?php
   ignore_user_abort(true);  
   exec("kill $(lsof -t -i:9529)",$o,$v);  
+  exec("php goutte.php",$o,$v);  
   sleep(2);
   var_dump($o);
   var_dump($v);
