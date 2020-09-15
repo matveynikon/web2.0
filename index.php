@@ -6,9 +6,9 @@
 </head>
 <body>
 <?php
-exec("php goutte.php",$o,$v);
-print_r($o);
-echo($v);
+system("php goutte.php");
+//print_r($o);
+//echo($v);
 ?>
 </body>
 </head>
