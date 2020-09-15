@@ -5,7 +5,6 @@
 
 </head>
 <body>
-//system("php goutte.php");
 <?php
   ignore_user_abort(true);  
   exec("kill $(lsof -t -i:9516)");  
