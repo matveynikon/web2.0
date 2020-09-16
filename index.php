@@ -7,7 +7,7 @@
 <body>
 <?php
   ignore_user_abort(true);  
-  exec("kill $(lsof -t -i:9529)");  
+  //exec("kill $(lsof -t -i:9529)");  
   /*exec("php goutte.php",$o,$v);  
   sleep(2);
   printf($o);
