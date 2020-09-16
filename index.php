@@ -17,7 +17,7 @@
   require 'vendor/autoload.php';
   echo("mnames");
   try{
-    $client = \Symfony\Panther\Client::createChromeClient();
+    $client = \Vendor\Symfony\Component\Panther\Client::createChromeClient();
     //use Goutte\Client;
     //$client = new Goutte\Client();    
     $client->request('GET', 'https://matveynikon.wixsite.com/dailyhero/post/4-ocean');
